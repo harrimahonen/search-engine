@@ -14,9 +14,11 @@ namespace search_engine
     {
         static void Main(string[] args)
         {
-            char[] delimiterChars = { ' ', ',', '.', ':', '\t', '\n',  };
-            string list = "";
+            //init variables
+            char[] delimiterChars = { ' ', ',', '.', ':', '\t', '\n', };
             List<Terms> wordPairing = new List<Terms>();
+
+            // get path to folder and get all files in collections folder
             string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
             string pathToCol = path + "\\collections\\";
             string outputFile = pathToCol + "\\output.txt";
@@ -31,7 +33,7 @@ namespace search_engine
 
 
             // do this for each document
-            for (int index = 0; index < filePath.Length; index++ )
+            for (int index = 0; index < filePath.Length; index++)
             {
                 var item = filePath[index];
                 string readFiles = File.ReadAllText(item);
@@ -40,53 +42,47 @@ namespace search_engine
                 // final consists of only words without numbers and special characters, also lowercase
 
                 // split into words
-                
+
                 string[] words = final.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
                 unique = new HashSet<string>(words);
-                int docNr = index;
-                //pair words with doc ID
-                foreach (string word in unique)
+                List<string> uniqueList = unique.ToList();
+
+
+                // TODO
+                // Check for new Term
+                // check for new DocId
+                // Check for occurence number
+
+                // loop words
+                int docCounter = 1;
+                for (int wordIndex = 0; wordIndex < words.Length; wordIndex++)
                 {
-                    wordPairing.Add( new Terms() { Term = word, DocId = docNr } );
-                }
-
-
-                // query is a unique words counter
-                var query = final
-                            .Split(' ')
-                            .ToLookup(x => x)
-                            .Select(x => new
-                            {
-                                Word = x.Key,
-                                Count = x.Count(),
-                            });
-
-                /* foreach (object o in wordPairing)
-                {
-
-                    list += o.ToString();
-                } 
-                
-                for (var id = 0; id < wordPairing.Count; id++)
-                {
-                    for (var textVal = 0; textVal < wordPairing[id].Count; textVal++)
+                    // Check for new Term
+                    // does wordPairing have the current word?
+                    for (int pairingIndex = 0; pairingIndex < wordPairing.Count; pairingIndex++)
                     {
-                        string temp = "";
+                        // TERM DOES NOT Exists in the list
+                        if (wordPairing[pairingIndex].Term != words[wordIndex])
+                        {
+                            docCounter = 1;
+                            wordPairing.Add(new Terms()
+                            {
+                                Term = words[wordIndex],
+                                DocId = new List<int> { index },
+                                AppearenceInDocs = 1,
+                                CountInDocs = { DocumentId = index, Counter = docCounter }
+                            });
+                        }
+                        // TERM DOES Exists in the list
+                        // Check the Document 
+                        else if (wordPairing[pairingIndex].Term == words[wordIndex])
+                        {
+
+                        }
                     }
-
-                }*/
-            }
-
-
-
-
-            // after processing documents
-            Console.WriteLine();
-                foreach (Terms apart in wordPairing)
-                {
-                    Console.WriteLine(apart);
                 }
-                File.WriteAllText(outputFile, list);
+            }
         }
     }
 }
+                        
