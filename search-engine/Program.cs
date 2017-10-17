@@ -62,6 +62,7 @@ namespace search_engine
                     for (int pairingIndex = 0; pairingIndex < wordPairing.Count; pairingIndex++)
                     {
                         // TERM DOES NOT Exists in the list
+                        //Add New Terms() with Term name, DocId, Doc Appearance and Count in current doc
                         if (wordPairing[pairingIndex].Term != words[wordIndex])
                         {
                             docCounter = 1;
@@ -77,7 +78,21 @@ namespace search_engine
                         // Check the Document 
                         else if (wordPairing[pairingIndex].Term == words[wordIndex])
                         {
-
+                            // Check for document ID, if it !contains current document Index
+                            // Push new document index and increase document freq counter
+                            if (!wordPairing[pairingIndex].DocId.Contains(index))
+                            {
+                                wordPairing[pairingIndex].DocId = new List<int> { index };
+                                wordPairing[pairingIndex].AppearenceInDocs++;
+                            }
+                            //Term Does Exists in the list and DocumentID is the same
+                            // Check for occurance and increase counter
+                            if (wordPairing[pairingIndex].DocId.Contains(index))
+                            {
+                                docCounter++;
+                                wordPairing[pairingIndex].CountInDocs.DocumentId = index;
+                                wordPairing[pairingIndex].CountInDocs.Counter = docCounter;
+                            }
                         }
                     }
                 }
