@@ -16,7 +16,7 @@ namespace search_engine
         {
             char[] delimiterChars = { ' ', ',', '.', ':', '\t', '\n',  };
             string list = "";
-            List<List<String>> wordPairing = new List<List<String>>();
+            List<Terms> wordPairing = new List<Terms>();
             string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
             string pathToCol = path + "\\collections\\";
             string outputFile = pathToCol + "\\output.txt";
@@ -33,7 +33,6 @@ namespace search_engine
             // do this for each document
             for (int index = 0; index < filePath.Length; index++ )
             {
-                wordPairing.Add(new List<String>());
                 var item = filePath[index];
                 string readFiles = File.ReadAllText(item);
                 string final = StringProcessor.RemoveSpecialCharacters(readFiles);
@@ -44,10 +43,11 @@ namespace search_engine
                 
                 string[] words = final.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
                 unique = new HashSet<string>(words);
+                int docNr = index;
                 //pair words with doc ID
                 foreach (string word in unique)
                 {
-                    wordPairing[index].Add(word);
+                    wordPairing.Add( new Terms() { Term = word, DocId = docNr } );
                 }
 
 
@@ -65,9 +65,8 @@ namespace search_engine
                 {
 
                     list += o.ToString();
-                } */
-
-
+                } 
+                
                 for (var id = 0; id < wordPairing.Count; id++)
                 {
                     for (var textVal = 0; textVal < wordPairing[id].Count; textVal++)
@@ -75,13 +74,19 @@ namespace search_engine
                         string temp = "";
                     }
 
-                }
+                }*/
             }
 
 
 
+
             // after processing documents
-            File.WriteAllText(outputFile, list);
+            Console.WriteLine();
+                foreach (Terms apart in wordPairing)
+                {
+                    Console.WriteLine(apart);
+                }
+                File.WriteAllText(outputFile, list);
         }
     }
 }
