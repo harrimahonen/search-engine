@@ -10,5 +10,10 @@ namespace search_engine
     {
         public int DocumentId { get; set; }
         public int Counter { get; set; }
+
+        public override string ToString()
+        {
+            return ""+Counter;
+        }
     }
 }

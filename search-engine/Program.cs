@@ -15,88 +15,77 @@ namespace search_engine
         static void Main(string[] args)
         {
             //init variables
-            char[] delimiterChars = { ' ', ',', '.', ':', '\t', '\n', };
-            List<Terms> wordPairing = new List<Terms>();
+            char[] delimiterChars = { ' ', '\n', };
+            List<Document> allDocuments = new List<Document>();
 
-            // get path to folder and get all files in collections folder
+            // get path to folder and get all .txt files in collections folder
             string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
             string pathToCol = path + "\\collections\\";
-            string outputFile = pathToCol + "\\output.txt";
             string[] filePath = Directory.GetFiles(pathToCol, "*.txt", SearchOption.TopDirectoryOnly);
-            HashSet<string> unique = new HashSet<string>();
+
+            //Incase we need to output into txt file
+            //string outputFile = pathToCol + "\\output.txt";
 
 
-            if (File.Exists(outputFile))
+           
+
+            // documentIndex == Current document == document ID
+            for (var documentIndex = 0; documentIndex < filePath.Length; documentIndex++)
             {
-                File.WriteAllText(outputFile, "");
-            }
+                //TOKENIZE
 
-
-            // do this for each document
-            for (int index = 0; index < filePath.Length; index++)
-            {
-                var item = filePath[index];
-                string readFiles = File.ReadAllText(item);
-                string final = StringProcessor.RemoveSpecialCharacters(readFiles);
-                final = StringProcessor.FilterWhiteSpaces(final).ToLower();
-                // final consists of only words without numbers and special characters, also lowercase
-
-                // split into words
-
-                string[] words = final.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
-                unique = new HashSet<string>(words);
-                List<string> uniqueList = unique.ToList();
-
-
-                // TODO
-                // Check for new Term
-                // check for new DocId
-                // Check for occurence number
-
-                // loop words
-                int docCounter = 1;
-                for (int wordIndex = 0; wordIndex < words.Length; wordIndex++)
+                //Go through each document
+                //Get Text Output
+                string readText = File.ReadAllText(filePath[documentIndex]);
+                //remove whitespace
+                var lines = readText.Split('\n')
+                        .Where(line => !string.IsNullOrWhiteSpace(line));
+                // join them again after split
+                string output = string.Join("\n", lines);
+                // get punctiations
+                var punctuation = output.Where(Char.IsPunctuation).Distinct().ToArray();
+                //split and remove empty and punctiations
+                var words = output.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim(punctuation));
+                //new temp list to clean up words further
+                List<String> temp = new List<string>();
+                //remove special characters
+                foreach (string item in words)
                 {
-                    // Check for new Term
-                    // does wordPairing have the current word?
-                    for (int pairingIndex = 0; pairingIndex < wordPairing.Count; pairingIndex++)
-                    {
-                        // TERM DOES NOT Exists in the list
-                        //Add New Terms() with Term name, DocId, Doc Appearance and Count in current doc
-                        if (wordPairing[pairingIndex].Term != words[wordIndex])
-                        {
-                            docCounter = 1;
-                            wordPairing.Add(new Terms()
-                            {
-                                Term = words[wordIndex],
-                                DocId = new List<int> { index },
-                                AppearenceInDocs = 1,
-                                CountInDocs = { DocumentId = index, Counter = docCounter }
-                            });
-                        }
-                        // TERM DOES Exists in the list
-                        // Check the Document 
-                        else if (wordPairing[pairingIndex].Term == words[wordIndex])
-                        {
-                            // Check for document ID, if it !contains current document Index
-                            // Push new document index and increase document freq counter
-                            if (!wordPairing[pairingIndex].DocId.Contains(index))
-                            {
-                                wordPairing[pairingIndex].DocId = new List<int> { index };
-                                wordPairing[pairingIndex].AppearenceInDocs++;
-                            }
-                            //Term Does Exists in the list and DocumentID is the same
-                            // Check for occurance and increase counter
-                            if (wordPairing[pairingIndex].DocId.Contains(index))
-                            {
-                                docCounter++;
-                                wordPairing[pairingIndex].CountInDocs.DocumentId = index;
-                                wordPairing[pairingIndex].CountInDocs.Counter = docCounter;
-                            }
-                        }
-                    }
+                    var cleanUp = item.RemoveSpecialCharacters();
+                    temp.Add(cleanUp);
                 }
+                //get only items that are not empty or null
+                //Tokenizing ready
+                var cleanOutput = temp.Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+                //Need list of all words in document to check their count
+                var checkAgainst = string.Join(" ", cleanOutput);
+
+                var grouping = GetDictionary(cleanOutput);
+                Document newDoc = new Document
+                {
+                    id = documentIndex,
+                    words = grouping
+                };
+                allDocuments.Add(newDoc);
+                Console.WriteLine("End of Document # " + documentIndex);
             }
+            Console.WriteLine("End of All Documents. Number of Documents: " + allDocuments.Count );
+
+        }
+        public static Dictionary<string, int> GetDictionary(string[] o)
+        {
+          var tt = o.GroupBy(txt => txt)
+                    .Where(grouping => grouping.Count() > 0)
+                    .ToDictionary(g => g.Key, g => g.Count());
+            foreach(object i in tt)
+            Console.WriteLine(i);
+            return tt;
+        }
+
+        public class Document
+            {
+                public int id;
+                public Dictionary<string, int> words;
         }
     }
 }

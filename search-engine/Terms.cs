@@ -10,10 +10,10 @@ namespace search_engine
     {
         public string Term { get; set; }
         public List<int> DocId = new List<int>();
-        public OccurenceObj CountInDocs;
+        public List<OccurenceObj> CountInDocs = new List<OccurenceObj>();
         public int AppearenceInDocs { get; set; }
 
-        public string getDocNrs(Terms o)
+        public string GetDocNrs(Terms o)
         {
             string temp = "";
             foreach (object item in o.DocId)
@@ -22,11 +22,20 @@ namespace search_engine
             }
             return temp;
         }
+        public string GetCountDoc(Terms o)
+        {
+            string temp = "";
+            foreach (object item in o.CountInDocs)
+            {
+                temp += item + ", ";
+            }
+            return temp;
+        }
 
 
         public override string ToString()
         {
-            return "Term: " + Term + "  DocumentID: " + getDocNrs(this) +"  Appears in: " + AppearenceInDocs +" documents and occurs # times: ";
+            return "Term: " + Term + "  DocumentID: " + GetDocNrs(this) +"  Appears in " + AppearenceInDocs +" of documents and frequency is "+ GetCountDoc(this) +"";
         }
     }
 
